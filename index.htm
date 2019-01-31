@@ -1,0 +1,218 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+	  <title>azda.mooo.com</title>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="myCanvas" width="950" height="1000" style="margin: auto;width:950px;display:block;"></canvas>
+    
+    <!--div id="dbg" style="border: 2px dashed #666;"></div-->
+    <script>
+      window.requestAnimFrame = (function(callback) {
+        return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+        function(callback) {
+          window.setTimeout(callback, 1000 / 60);
+        };
+      })();
+      function debug(msg, context) {
+		  /*var dbgTag = document.getElementById('dbg');
+		  /*dbgTag.innerHTML = dbgTag.innerHTML + msg+"<br />";/**/
+		context.font = '20pt Courrier';
+		var strSplit = msg.split("\n").reverse();
+		var lineHeight = 20;
+		var yPos = lineHeight;
+		context.save();
+		context.fillStyle = 'black';
+		while(strSplit.length>0) {
+			context.fillText(strSplit.pop(), 0, yPos);
+			yPos+=lineHeight;
+		}
+		context.restore();
+	  }
+
+      function drawRectangle(myRectangle, context, color, alpha) {
+        context.save()
+        context.beginPath();
+        context.rect(myRectangle.x, myRectangle.y, myRectangle.width, myRectangle.height);
+        
+        context.globalAlpha = alpha;
+        context.fillStyle = color;
+        context.fill();
+        
+        /*context.lineWidth = myRectangle.borderWidth+500;
+        context.strokeStyle = 'black';
+        context.stroke();/**/
+        
+		context.restore();
+      }
+      function drawImage(myImage, context) {
+		context.drawImage(myImage.imgObj, myImage.x, myImage.y, myImage.width, myImage.height);
+		  
+		  
+		/*context.save();
+		context.strokeStyle = '#f00';
+		context.beginPath();
+		context.lineWidth = 1;
+		
+		//X image centre
+		context.moveTo(myImage.x+myImage.width/2, 0);
+		context.lineTo(myImage.x+myImage.width/2, canvas.height);
+		context.stroke();
+		
+		//Y image centre
+		context.moveTo(0, myImage.y+myImage.height/2);
+		context.lineTo(canvas.width, myImage.y+myImage.height/2);
+		context.stroke();
+		
+		//Top
+		context.moveTo(myImage.x, myImage.y);
+		context.lineTo(myImage.x + myImage.width, myImage.y);
+		context.stroke();
+		
+		//Bottom
+		context.moveTo(myImage.x, myImage.y+myImage.height);
+		context.lineTo(myImage.x + myImage.width, myImage.y+myImage.height);
+		context.stroke();
+		
+		//Left
+		context.moveTo(myImage.x, myImage.y);
+		context.lineTo(myImage.x, myImage.y+myImage.height);
+		context.stroke();
+		
+		//Right
+		context.moveTo(myImage.x+myImage.width, myImage.y);
+		context.lineTo(myImage.x+myImage.width, myImage.y+myImage.height);
+		context.stroke();
+		
+		//Cross Top-Left -> Bottom-Right
+		context.moveTo(myImage.x, myImage.y);
+		context.lineTo(myImage.x+myImage.width, myImage.y+myImage.height);
+		context.stroke();
+		
+		//Cross Bottom-Left -> Top-Right
+		context.moveTo(myImage.x, myImage.y+myImage.height);
+		context.lineTo(myImage.x+myImage.width, myImage.y);
+		context.stroke();
+		
+		context.restore();/**/
+		
+	}
+	function drawShadow(genX, genY, pos, radius, context) {
+		
+		var invGenY = (genY*-1);
+		
+		
+		context.rect(0, 0, canvas.width, canvas.height);
+      context.save();
+      
+      context.translate(pos.x, pos.y);
+      var scaleX = 3;
+		var scaleY = 1;
+      // scale context horizontally
+      context.scale(scaleX, scaleY);
+      
+      context.rect(0, 0, canvas.width, canvas.height);
+
+      // create radial gradient
+      var grd = context.createRadialGradient(0, 0, radius/2*.1*(invGenY+1)/2/scaleX+radius/scaleX*.05, 0, 0, radius/2*(invGenY+1)/2/scaleX+radius/scaleX);
+      grd.addColorStop(0, '#000');
+	  grd.addColorStop((genY+1)/2*.6+.1, '#333');
+	  grd.addColorStop(1, '#FFF');
+
+      context.fillStyle = grd;
+      context.fill();
+      
+      context.restore();
+	}
+
+      function animate(myImage, canvas, context, startTime) {
+        // update
+        var time = (new Date()).getTime() - startTime;
+        var amplitudeX = 50;
+        var amplitudeY = 100;
+
+        // in ms
+        var periodX = 8000;
+        
+        var canvasCentreX = canvas.width / 2;
+        var canvasCentreY = canvas.height / 2;
+        
+        var periodY = periodX*2/3;
+        var centerX = canvasCentreX - myImage.width / 2;
+        var bottomY = canvasCentreY - myImage.height / 2;
+        
+        var genX = Math.sin(time * 2 * Math.PI / periodX);        
+        var genY = Math.cos(time * 2 * Math.PI / periodY);
+        
+        myImage.x = amplitudeX * genX + centerX;
+        myImage.y = amplitudeY * genY + bottomY;
+
+        // clear
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        // draw
+        //drawShadow(genX, genY, {x: amplitudeX*genX+canvasCentreX/2-50, y: canvas.height-50, width: 50, height: 50}, context)
+        drawShadow(genX, genY, {x: amplitudeX*genX+canvasCentreX, y: canvas.height-myImage.width/3}, myImage.width/2, context);
+        
+        
+        //drawRectangle(myRectangle, context);
+        drawImage(myImage, context);
+        
+        //debug("genX: "+Math.round(genX*100)/100+"\ngenY: "+Math.round(genY*100)/100, context);
+        
+ 
+        // request new frame
+        setTimeout(function() {
+			window.requestAnimFrame(function() {
+			animate(myImage, canvas, context, startTime);
+			});
+		}
+	        , 1000/60);
+      }
+      
+      var canvas = document.getElementById('myCanvas');
+      var context = canvas.getContext('2d');
+      
+      var imageObj = new Image();
+	  imageObj.src = "./cow.png";
+	  
+	  
+	  var cow = {
+		  x: 0,
+		  y: 0,
+		  height: 512,
+		  width: 357,
+		  imgObj: imageObj
+	  }
+	  
+	  //Initial position
+	  cow.x = canvas.width / 2 - cow.width / 2; //Center
+	  cow.y = canvas.height - cow.height; // Bottom
+	  
+	  //debug(""+String(canvas.width / 2)+" - "+String(cow.width / 2)+" = "+cow.x);
+
+      var myRectangle = {
+        x: 250,
+        y: 70,
+        width: 100,
+        height: 50,
+        borderWidth: 5
+      };
+
+      //drawRectangle(myRectangle, context);
+		drawImage(cow, context);
+      // wait one second before starting animation
+      setTimeout(function() {
+        var startTime = (new Date()).getTime();
+        //animate(myRectangle, canvas, context, startTime);
+        animate(cow, canvas, context, startTime);
+      }, 100);/**/
+    </script>
+  </body>
+</html>    
